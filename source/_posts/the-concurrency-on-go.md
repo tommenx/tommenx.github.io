@@ -387,6 +387,51 @@ var fetcher = fakeFetcher{
 ```
 
 ### 代码解析
+#### 串行的方式爬取内容
+1. 在`CrawlSewrial`中首先判断当前这个`url`是否被爬取过
+2. 若未爬取`body, urls, err := fetcher.Feach(url)`，打印当前的`body`
+3. 遍历urls，继续爬取内容
+
+
+#### 使用Mutex并行爬取数据
+```go
+var done sync.WaitGroup
+for _, u := range urls {
+	done.Add(1)
+	go func(u string) {
+		defer done.Done()
+		CrawlConcurrentMutex(u, fetcher, f)
+	}(u) // Without the u argument there is a race
+}
+done.Wait()
+```
+遍历`urls`，每读取一条就并行的执行，并将任务添加进入`var done sync.WaitGroup`中
+在循环外设置`done.Wait()`等待所有的线程执行完毕后继续执行主线程代码
+
+#### 使用Channel并行爬取数据
+```go
+func master(ch chan []string, fetcher Fetcher) {
+	n := 1
+	fetched := make(map[string]bool)
+	for urls := range ch {
+		for _, u := range urls {
+			if _, ok := fetched[u]; ok == false {
+				fetched[u] = true
+				n += 1
+				go dofetch(u, ch, fetcher)
+			}
+		}
+		n -= 1
+		if n == 0 {
+			break
+		}
+	}
+}
+```
+将要爬取的`url`放入`channel`中，使用`master`处理，判断是否已经被访问过
+若否开辟一个线程去访问，并将新的`urls`放入`channel`中 `n+1`
+读完一个`ch`中的`urls`后`n-1`直到最后`n=0`退出循环，所有的`url`都已经访问
+
 
 
 

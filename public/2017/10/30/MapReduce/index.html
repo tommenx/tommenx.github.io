@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="mapreduce," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近读了一下经典的MapReduce这篇论文，大概的了解了一下整个模型的处理流程和用户的编程的方法，以及处理过程的优化和差错处理，下面我来谈谈我对论文的理解。网上有的更多的是使用MapReduce,而我着重对原理的理解。并且，我也跟着MIT6.824的实验实验了一个简单的MapReduce模型，采用多线程来模拟分布式，最终实现了词频统计和倒排序索引 编程模型整个mapreduce分成两个部分，包括">
+<meta name="keywords" content="mapreduce">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MapReduce">
+<meta property="og:url" content="http://yoursite.com/2017/10/30/MapReduce/index.html">
+<meta property="og:site_name" content="tommenx&#39;s blogs">
+<meta property="og:description" content="最近读了一下经典的MapReduce这篇论文，大概的了解了一下整个模型的处理流程和用户的编程的方法，以及处理过程的优化和差错处理，下面我来谈谈我对论文的理解。网上有的更多的是使用MapReduce,而我着重对原理的理解。并且，我也跟着MIT6.824的实验实验了一个简单的MapReduce模型，采用多线程来模拟分布式，最终实现了词频统计和倒排序索引 编程模型整个mapreduce分成两个部分，包括">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2017/10/30/MapReduce/excution.png">
+<meta property="og:image" content="http://yoursite.com/2017/10/30/MapReduce/transfer.png">
+<meta property="og:image" content="http://yoursite.com/2017/10/30/MapReduce/allcondition.png">
+<meta property="og:updated_time" content="2017-11-01T07:34:04.784Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MapReduce">
+<meta name="twitter:description" content="最近读了一下经典的MapReduce这篇论文，大概的了解了一下整个模型的处理流程和用户的编程的方法，以及处理过程的优化和差错处理，下面我来谈谈我对论文的理解。网上有的更多的是使用MapReduce,而我着重对原理的理解。并且，我也跟着MIT6.824的实验实验了一个简单的MapReduce模型，采用多线程来模拟分布式，最终实现了词频统计和倒排序索引 编程模型整个mapreduce分成两个部分，包括">
+<meta name="twitter:image" content="http://yoursite.com/2017/10/30/MapReduce/excution.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/30/MapReduce/"/>
+
+
+
+
+
+  <title>MapReduce | tommenx's blogs</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">tommenx's blogs</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/30/MapReduce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="tommenx zx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="tommenx's blogs">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MapReduce</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-30T21:32:06+08:00">
+                2017-10-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式系统</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/MIT6-824/" itemprop="url" rel="index">
+                    <span itemprop="name">MIT6.824</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 浏览
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近读了一下经典的MapReduce这篇论文，大概的了解了一下整个模型的处理流程和用户的编程的方法，以及处理过程的优化和差错处理，下面我来谈谈我对论文的理解。网上有的更多的是使用MapReduce,而我着重对原理的理解。<br>并且，我也跟着MIT6.824的实验实验了一个简单的MapReduce模型，采用多线程来模拟分布式，最终实现了词频统计和倒排序索引</p>
+<h2 id="编程模型"><a href="#编程模型" class="headerlink" title="编程模型"></a>编程模型</h2><p>整个<code>mapreduce</code>分成两个部分，包括<code>map</code>和<code>reduce</code>部分，其中map的输入为<code>key/value pairs</code>，输出为<code>intermediate key/value pairs</code>，而<code>reduce</code>接受 <code>key</code>和所对应的<code>values</code>将其合并。简单的过程如下所示:</p>
+<p><code>map            (k1,v1)            -&gt;        list(k2,v2)</code><br><code>reduce        (k2,list(v2))    -&gt;        list(v2)</code></p>
+<h2 id="执行过程"><a href="#执行过程" class="headerlink" title="执行过程"></a>执行过程</h2><p>整个模型的执行过程比较明了，当处理到<code>mapreduce</code>部分时，<code>master</code>开始统领整个过程，将输入内容分割并分配给M台机器进行Map的工作，结束后每个Map都将中间值分成R个分区<code>hash(key)%R</code>，R个机器读取完每个中间文件的相应的分区后进行Reduce的工作最后输出结果并合并。整个过程如下图所示<br><img src="/2017/10/30/MapReduce/excution.png" alt="excution.png" title=""></p>
+<h3 id="map"><a href="#map" class="headerlink" title="map"></a>map</h3><ol>
+<li>MapReduce Library 将用户的输入文件分成M块，每一块的大小为16-64MB可以由用户指定，然后将用户的代码复制到集群的各个机器上</li>
+<li>master指定 M map 任务，R reduce 任务，并挑选空闲的机器执行</li>
+<li>map 将输入的内容转化成 intermediate key-value pairs ，并存储在自己的内存当中</li>
+<li>周期性的将内存中的键值对写入本机的磁盘中并分割成R个区，可以使用<code>hash(key)%R</code>处理，并将在磁盘中的存储位置返回给master</li>
+</ol>
+<h3 id="reduce"><a href="#reduce" class="headerlink" title="reduce"></a>reduce</h3><ol>
+<li>reduce 利用<strong>网络</strong>从master所给的地址中读取完所有的内容后，按照key将结果进行<strong>排序</strong>，如果内容过大可以使用外部排序</li>
+<li>当reduce 遍历完成后，将 key 和对应的 value序列传递给用户指定的reduce程序</li>
+<li>当所有的任务都执行完成后，mapreduce 返回用户程序代码</li>
+</ol>
+<h2 id="容错处理"><a href="#容错处理" class="headerlink" title="容错处理"></a>容错处理</h2><p>Mapreduce 编程模型是建立在一个计算机的集群上的，需要考虑主机失效的情况，类似与GFS。这一点也是十分重要的，考虑了实际情况中，集群往往采用了一些低性能，被淘汰的电脑，计算机失效的情况十分的常见。其中失效分成了两种情况：1.Worker Failure;2.Master Failure;</p>
+<h3 id="Worker-Failure"><a href="#Worker-Failure" class="headerlink" title="Worker Failure"></a>Worker Failure</h3><ul>
+<li>master周期性的<code>ping</code>worker，如果长时间没有的到回应认为当前worker失效</li>
+<li>当work完成了master所指派的任务时，会被标记成<code>idle</code></li>
+<li>因为map结束后，结果存储在本地的磁盘中，如果任务结束而主机失效了，需要重新分配在一台主机上，而reduce则不用，因为结果存储在全局的文件系统中</li>
+<li>总之其中的worker失效了，master会将任务重新指派给被标记为<code>idle</code>的机器继续完成任务，不会有其他的影响</li>
+</ul>
+<h3 id="Master-Failure"><a href="#Master-Failure" class="headerlink" title="Master Failure"></a>Master Failure</h3><ul>
+<li>master可以周期性的建立备份，当master宕机后，可以从这些checkpoint中恢复过来</li>
+<li>然而，必须终止当前的mapreduce活动，用户需要重新开始尝试</li>
+</ul>
+<h2 id="模型优化"><a href="#模型优化" class="headerlink" title="模型优化"></a>模型优化</h2><h3 id="Locality"><a href="#Locality" class="headerlink" title="Locality"></a>Locality</h3><p>mapreduce是面向大规模数据的处理模型，因此大量的数据在网络中传输占用了大量的带宽，产生了大量的时延，因此我们可以有限指派数据所在的电脑进行map的任务，避免了这部分数据的传输。而mapreduce是配合GFS使用，而GFS将文件分成大小相同的chunck并有多个replicas分布在不同的chunck-machine,所以master将map任务分配给了那些有这些replica的机器上，减小了网络数据量的传输</p>
+<h3 id="Task-Granularity"><a href="#Task-Granularity" class="headerlink" title="Task Granularity"></a>Task Granularity</h3><p>我们将map任务切割成M块，reduce任务分割成R块，理论上M和R应该远远大于机器的数量，让一个worker运行多个不同的任务能够动态的均衡负载并且当worker失效的时候能够快速的恢复（？？？这里一直不太懂）<br>在R和M的设置上，我们选择一个M使得每一份输入的大小控制在16-64MB，而R的大小是worker数量的一个倍数，例如当workers=2000，R=5000，M=20000</p>
+<h3 id="Backup-Tasks"><a href="#Backup-Tasks" class="headerlink" title="Backup Tasks"></a>Backup Tasks</h3><p>Backup Tasks 是模型优化的精髓。由于众所周知的“木桶效应”，执行的时间往往是由最慢的那个worker决定的，即“straggler”。正是由于这些“stragger”的存在，使得整个mapreduce的过程耗费大量的时间。因此，在当mapreduce过程接近完成的时候,master又将这些正在进行的任务分配给backup，无论是primary还是backup完成了都标记成任务完成，经过计算大约减少了44%的时间</p>
+<h2 id="性能分析"><a href="#性能分析" class="headerlink" title="性能分析"></a>性能分析</h2><h3 id="Grep"><a href="#Grep" class="headerlink" title="Grep"></a>Grep</h3><img src="/2017/10/30/MapReduce/transfer.png" alt="transfer.png" title="">
+<p>上图是数据传送过程中的速率图，其中在50s左右的时候1764台机器开始进行工作，数据传输速率到达30GB/s，当map结束后，速率开始下降我都知道80s是停止。这里所谓的数据传输速率可以代表progress computation。<br>可以看出在前60s的overhead，是因为master需要将处理的程序传送到每一个worker上，能达到这样的速度也是由于上面所说的<strong>Local Optimization</strong><br>使得大量的传输不依靠网络。</p>
+<h3 id="Sort"><a href="#Sort" class="headerlink" title="Sort"></a>Sort</h3><ol>
+<li>在这次sort中，我们设置M=15000，R=4000，在(a)的最上面的图中我们可以看出在200秒左右map任务完成，速率最高到达13GB/s，低于上面的<strong>Grep</strong>是因为map结束后需要产生<strong>Intermediate Key</strong>并写入磁盘中，耗费大量的I/O时间</li>
+<li>shuffling在第一个map完成之后开始，由于本次有1700个worker，因此大致上有两个峰分别代表两个batch</li>
+<li>最后一张图是reduce worker工作，输入为Intermediate key-value paris，最终在891秒完成了任务</li>
+</ol>
+<p>有一些东西需要我们稍微注意一下：</p>
+<ul>
+<li>输入的速率远大于shuffle也是因为<strong>Local Opimization</strong>,大部分的数据都在本地，而shuffle是依靠网络，reduce远距离读取worker存在本地硬盘中的结果</li>
+<li>输出的速率比起shuffle更小是因为我们做了备份，每个结果都有一个备份因此速率更小</li>
+</ul>
+<img src="/2017/10/30/MapReduce/allcondition.png" alt="allcondition.png" title="">
+<h3 id="Effect-of-Backup-Tasks"><a href="#Effect-of-Backup-Tasks" class="headerlink" title="Effect of Backup Tasks"></a>Effect of Backup Tasks</h3><p>在图(b)中可以看出最后的完成的时间为1200多秒，因为有”stragger”一直拖着，导致最后完成需要更多的时间。<br>可以看出backup对整个工作还是十分有益的</p>
+<h3 id="Machine-Failures"><a href="#Machine-Failures" class="headerlink" title="Machine Failures"></a>Machine Failures</h3><p>图(c)表示了在运行的过程中出现了部分机器失效的情况，可以看出立刻安排了新的workers，整个mapreduce的工作还是继续进行<br>可以看到Input rate 出现了负增长，是因为部分完成的map的工作丢失了（intermediate key-values存储在本地）随后马上执行re-execution，只比正常情况多了5%的时间</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上就是我对mapreduce的总结，我会尽快写出MIT6.824 实验一（实现一个简易的mapreduce）</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mapreduce/" rel="tag"># mapreduce</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/30/GFS/" rel="next" title="GFS">
+                <i class="fa fa-chevron-left"></i> GFS
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">tommenx zx</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#编程模型"><span class="nav-number">1.</span> <span class="nav-text">编程模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#执行过程"><span class="nav-number">2.</span> <span class="nav-text">执行过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#map"><span class="nav-number">2.1.</span> <span class="nav-text">map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reduce"><span class="nav-number">2.2.</span> <span class="nav-text">reduce</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容错处理"><span class="nav-number">3.</span> <span class="nav-text">容错处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Worker-Failure"><span class="nav-number">3.1.</span> <span class="nav-text">Worker Failure</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Master-Failure"><span class="nav-number">3.2.</span> <span class="nav-text">Master Failure</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模型优化"><span class="nav-number">4.</span> <span class="nav-text">模型优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Locality"><span class="nav-number">4.1.</span> <span class="nav-text">Locality</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Task-Granularity"><span class="nav-number">4.2.</span> <span class="nav-text">Task Granularity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Backup-Tasks"><span class="nav-number">4.3.</span> <span class="nav-text">Backup Tasks</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#性能分析"><span class="nav-number">5.</span> <span class="nav-text">性能分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Grep"><span class="nav-number">5.1.</span> <span class="nav-text">Grep</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sort"><span class="nav-number">5.2.</span> <span class="nav-text">Sort</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Effect-of-Backup-Tasks"><span class="nav-number">5.3.</span> <span class="nav-text">Effect of Backup Tasks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Machine-Failures"><span class="nav-number">5.4.</span> <span class="nav-text">Machine Failures</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tommenx zx</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问人数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

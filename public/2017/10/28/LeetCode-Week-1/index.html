@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="LeetCode," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="写在前面  实在是无法忍受自己写代码如此差劲，心里所想的东西完无法用代码表达出来，因此打算从头开始一点一点的刷 LeetCode我的计划是每天至少写两道题并进行总结，一周发一次Blog，虽然这个可能花费大量时间，但胜在能够打牢基础，我认为这还是值得的每道题都会由以下几个部分组成：  题目 代码 如果没有代码，就写没有考虑到的地方 优秀的代码和解析  希望能坚持啊！兄弟！ Spiral Matri">
+<meta name="keywords" content="LeetCode">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LeetCode-Week-1">
+<meta property="og:url" content="http://yoursite.com/2017/10/28/LeetCode-Week-1/index.html">
+<meta property="og:site_name" content="tommenx&#39;s blogs">
+<meta property="og:description" content="写在前面  实在是无法忍受自己写代码如此差劲，心里所想的东西完无法用代码表达出来，因此打算从头开始一点一点的刷 LeetCode我的计划是每天至少写两道题并进行总结，一周发一次Blog，虽然这个可能花费大量时间，但胜在能够打牢基础，我认为这还是值得的每道题都会由以下几个部分组成：  题目 代码 如果没有代码，就写没有考虑到的地方 优秀的代码和解析  希望能坚持啊！兄弟！ Spiral Matri">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-10-30T13:22:40.533Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LeetCode-Week-1">
+<meta name="twitter:description" content="写在前面  实在是无法忍受自己写代码如此差劲，心里所想的东西完无法用代码表达出来，因此打算从头开始一点一点的刷 LeetCode我的计划是每天至少写两道题并进行总结，一周发一次Blog，虽然这个可能花费大量时间，但胜在能够打牢基础，我认为这还是值得的每道题都会由以下几个部分组成：  题目 代码 如果没有代码，就写没有考虑到的地方 优秀的代码和解析  希望能坚持啊！兄弟！ Spiral Matri">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/28/LeetCode-Week-1/"/>
+
+
+
+
+
+  <title>LeetCode-Week-1 | tommenx's blogs</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">tommenx's blogs</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/28/LeetCode-Week-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="tommenx zx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="tommenx's blogs">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">LeetCode-Week-1</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-28T15:13:19+08:00">
+                2017-10-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/LeetCode/" itemprop="url" rel="index">
+                    <span itemprop="name">LeetCode</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 浏览
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>写在前面</p>
+</blockquote>
+<p>实在是无法忍受自己写代码如此差劲，心里所想的东西完无法用代码表达出来，因此打算从头开始一点一点的刷 LeetCode<br>我的计划是每天<strong>至少</strong>写两道题并进行总结，一周发一次Blog，虽然这个可能花费大量时间，但胜在能够打牢基础，我认为这还是值得的<br>每道题都会由以下几个部分组成：</p>
+<ul>
+<li>题目</li>
+<li>代码</li>
+<li>如果没有代码，就写没有考虑到的地方</li>
+<li>优秀的代码和解析</li>
+</ul>
+<p>希望能坚持啊！兄弟！</p>
+<h2 id="Spiral-Matrix"><a href="#Spiral-Matrix" class="headerlink" title="Spiral Matrix"></a>Spiral Matrix</h2><p>Given a matrix of m x n elements (m rows, n columns), return all elements of the matrix in spiral order.</p>
+<p>For example,<br>Given the following matrix:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[</div><div class="line"> [ <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span> ],</div><div class="line"> [ <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span> ],</div><div class="line"> [ <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span> ]</div><div class="line">]</div></pre></td></tr></table></figure></p>
+<p>You should return <code>[1,2,3,6,9,8,7,4,5]</code></p>
+<h3 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h3><p>这道题就是以螺旋的方式遍历整个二维数组，我的思路是设置1个变量k用于计数，还有4个变量用于指向四个遍历方向，还有一个二维数组记录每一个位置上的数字是否被访问过，若是，跳过，有点傻有点啰嗦</p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line"> <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; spiralOrder(<span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt;&amp; matrix) &#123;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;res;</div><div class="line">    <span class="keyword">if</span>(matrix.empty())</div><div class="line">        <span class="keyword">return</span> res;</div><div class="line">	<span class="keyword">int</span> m = matrix.size();</div><div class="line">	<span class="keyword">int</span> n = matrix[<span class="number">0</span>].size();</div><div class="line">	<span class="keyword">int</span> a[<span class="number">50</span>][<span class="number">50</span>];</div><div class="line">	<span class="built_in">memset</span>(a, <span class="number">0</span>, <span class="keyword">sizeof</span>(a));</div><div class="line">	<span class="keyword">int</span> k = <span class="number">0</span>, i, j;</div><div class="line">	<span class="keyword">int</span> q, w, e, r;</div><div class="line">	q = r = <span class="number">0</span>;</div><div class="line">	w = n<span class="number">-1</span>;</div><div class="line">	e = m<span class="number">-1</span>;</div><div class="line">	<span class="keyword">while</span> (k &lt; m*n)</div><div class="line">	&#123;</div><div class="line">		<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++)</div><div class="line">		&#123;</div><div class="line">			<span class="keyword">if</span> (a[q][i] == <span class="number">0</span>)</div><div class="line">			&#123;</div><div class="line">				res.push_back(matrix[q][i]);</div><div class="line">				a[q][i] = <span class="number">1</span>;</div><div class="line">				k++;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		q++;</div><div class="line">		<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; m; i++)</div><div class="line">		&#123;</div><div class="line">			<span class="keyword">if</span> (a[i][w] == <span class="number">0</span>)</div><div class="line">			&#123;</div><div class="line">				res.push_back(matrix[i][w]);</div><div class="line">				a[i][w] = <span class="number">1</span>;</div><div class="line">				k++;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		w--;</div><div class="line">		<span class="keyword">for</span> (i = n - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--)</div><div class="line">		&#123;</div><div class="line">			<span class="keyword">if</span> (a[e][i] == <span class="number">0</span>)</div><div class="line">			&#123;</div><div class="line">				res.push_back(matrix[e][i]);</div><div class="line">				a[e][i] = <span class="number">1</span>;</div><div class="line">				k++;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		e--;</div><div class="line">		<span class="keyword">for</span> (i = m - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--)</div><div class="line">		&#123;</div><div class="line">			<span class="keyword">if</span> (a[i][r] == <span class="number">0</span>)</div><div class="line">			&#123;</div><div class="line">				res.push_back(matrix[i][r]);</div><div class="line">				a[i][r] = <span class="number">1</span>;</div><div class="line">				k++;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		r++;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> res;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="简便的代码"><a href="#简便的代码" class="headerlink" title="简便的代码"></a>简便的代码</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></div><div class="line">    <span class="keyword">public</span> List&lt;Integer&gt; spiralOrder(<span class="keyword">int</span>[][] matrix) &#123;</div><div class="line">        </div><div class="line">        List&lt;Integer&gt; res = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</div><div class="line">        </div><div class="line">        <span class="keyword">if</span> (matrix.length == <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">return</span> res;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        <span class="keyword">int</span> rowBegin = <span class="number">0</span>;</div><div class="line">        <span class="keyword">int</span> rowEnd = matrix.length<span class="number">-1</span>;</div><div class="line">        <span class="keyword">int</span> colBegin = <span class="number">0</span>;</div><div class="line">        <span class="keyword">int</span> colEnd = matrix[<span class="number">0</span>].length - <span class="number">1</span>;</div><div class="line">        </div><div class="line">        <span class="keyword">while</span> (rowBegin &lt;= rowEnd &amp;&amp; colBegin &lt;= colEnd) &#123;</div><div class="line">            <span class="comment">// Traverse Right</span></div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = colBegin; j &lt;= colEnd; j ++) &#123;</div><div class="line">                res.add(matrix[rowBegin][j]);</div><div class="line">            &#125;</div><div class="line">            rowBegin++;</div><div class="line">            </div><div class="line">            <span class="comment">// Traverse Down</span></div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = rowBegin; j &lt;= rowEnd; j ++) &#123;</div><div class="line">                res.add(matrix[j][colEnd]);</div><div class="line">            &#125;</div><div class="line">            colEnd--;</div><div class="line">            </div><div class="line">            <span class="keyword">if</span> (rowBegin &lt;= rowEnd) &#123;</div><div class="line">                <span class="comment">// Traverse Left</span></div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = colEnd; j &gt;= colBegin; j --) &#123;</div><div class="line">                    res.add(matrix[rowEnd][j]);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            rowEnd--;</div><div class="line">            </div><div class="line">            <span class="keyword">if</span> (colBegin &lt;= colEnd) &#123;</div><div class="line">                <span class="comment">// Traver Up</span></div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = rowEnd; j &gt;= rowBegin; j --) &#123;</div><div class="line">                    res.add(matrix[j][colBegin]);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            colBegin ++;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        <span class="keyword">return</span> res;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>同样也是while中套着循环，同时也是利用了四个变量分别指向行、列的开始、结尾的位置，可以通过这四个变量设置循环的次数，而不用另外开辟一个数组来记录该数字是否被访问过。</p>
+<h2 id="Maximum-Subarray"><a href="#Maximum-Subarray" class="headerlink" title="Maximum Subarray"></a>Maximum Subarray</h2><p>Find the contiguous subarray within an array (containing at least one number) which has the largest sum.</p>
+<p>For example, given the array<code>[-2,1,-3,4,-1,2,1,-5,4]</code>,<br>the contiguous subarray<code>[4,-1,2,1]</code>has the largest sum =<code>6</code>.</p>
+<h3 id="愚蠢的代码"><a href="#愚蠢的代码" class="headerlink" title="愚蠢的代码"></a>愚蠢的代码</h3><p>这代码一看就是会超时的，想过使用DP算法，但是不知道怎么处理<strong>连续</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">int maxSubArray(vector&lt;int&gt;&amp; nums) &#123;</div><div class="line">	int max_sum = INT_MIN;</div><div class="line">	int i;</div><div class="line">	for (i = 0; i &lt; nums.size(); i++)</div><div class="line">	&#123;</div><div class="line">		int temp = func(i, nums);</div><div class="line">		max_sum = max(max_sum, temp);</div><div class="line">	&#125;</div><div class="line">	return max_sum;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int func(int begin, vector&lt;int&gt; &amp;nums)</div><div class="line">&#123;</div><div class="line">	int sum = 0;</div><div class="line">	int max_sum = nums[begin];</div><div class="line">	int i;</div><div class="line">	for (i = begin ; i &lt; nums.size(); i++)</div><div class="line">	&#123;</div><div class="line">		sum += nums[i];</div><div class="line">		max_sum = max(sum, max_sum);</div><div class="line">	&#125;</div><div class="line">	return max_sum;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="优秀的代码"><a href="#优秀的代码" class="headerlink" title="优秀的代码"></a>优秀的代码</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">maxSubArray</span><span class="params">(<span class="keyword">int</span>[] A)</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> n = A.length;</div><div class="line">        <span class="keyword">int</span>[] dp = <span class="keyword">new</span> <span class="keyword">int</span>[n];<span class="comment">//dp[i]表示从A[0]-A[i]中连续的字串最大值</span></div><div class="line">        dp[<span class="number">0</span>] = A[<span class="number">0</span>];</div><div class="line">        <span class="keyword">int</span> max = dp[<span class="number">0</span>];</div><div class="line">        </div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;</div><div class="line">            dp[i] = A[i] + (dp[i - <span class="number">1</span>] &gt; <span class="number">0</span> ? dp[i - <span class="number">1</span>] : <span class="number">0</span>);</div><div class="line">            max = Math.max(max, dp[i]);</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        <span class="keyword">return</span> max;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>当前的字串最大值，是当前的值 + 之前的的字串的值 是否大于0，若小于，相当于重新开始计算子串的最大值</p>
+<h2 id="56-Merge-Intervals"><a href="#56-Merge-Intervals" class="headerlink" title="56. Merge Intervals"></a>56. Merge Intervals</h2><p>Given a collection of intervals, merge all overlapping intervals.</p>
+<p>For example,<br>Given<code>[1,3],[2,6],[8,10],[15,18]</code>,<br>return<code>[1,6],[8,10],[15,18]</code>.</p>
+<h3 id="解析-1"><a href="#解析-1" class="headerlink" title="解析"></a>解析</h3><p>这道题看上去还是十分简单的，就是遍历如果前一个的end大于后一个start,则赋值并继续循环<br>如果不符合，就加到结果的<code>vector</code>中，并更新start和end的值<br><strong>注意点</strong></p>
+<ol>
+<li>首先要对其进行排序，按照start升序</li>
+<li>考虑多种情况,也有可能前一个包含后一个</li>
+</ol>
+<h3 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">static bool cmp(const Interval &amp;a, const Interval &amp;b)</div><div class="line">&#123;</div><div class="line">	return a.start &lt; b.start;</div><div class="line">&#125;</div><div class="line">    </div><div class="line">vector&lt;Interval&gt; merge(vector&lt;Interval&gt;&amp; intervals) &#123;</div><div class="line">	int i, j, k;</div><div class="line">	vector&lt;Interval&gt;res;</div><div class="line">    if (intervals.empty())</div><div class="line">		return res;</div><div class="line">    sort(intervals.begin(), intervals.end(), cmp);</div><div class="line">	int start = intervals[i].start;</div><div class="line">	int end = intervals[i].end;</div><div class="line">	for (i = 1; i &lt; intervals.size(); i++)</div><div class="line">	&#123;</div><div class="line">        if (intervals[i].start &gt;= start &amp;&amp; intervals[i].end &lt;= end)</div><div class="line">            continue;</div><div class="line">		if (intervals[i].start &lt;= end)</div><div class="line">		&#123;</div><div class="line">			end = intervals[i].end;</div><div class="line">			continue;</div><div class="line">		&#125;</div><div class="line">		else</div><div class="line">		&#123;</div><div class="line">			Interval tmp = &#123; start, end &#125;;</div><div class="line">			res.push_back(tmp);</div><div class="line">			start = intervals[i].start;</div><div class="line">			end = intervals[i].end;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">    Interval tmp = &#123; start, end &#125;;</div><div class="line">	res.push_back(tmp);</div><div class="line">	return res;</div><div class="line">    </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="55-Jump-Game"><a href="#55-Jump-Game" class="headerlink" title="55. Jump Game"></a>55. Jump Game</h2><p>Given an array of non-negative integers, you are initially positioned at the first index of the array.</p>
+<p>Each element in the array represents your maximum jump length at that position.</p>
+<p>Determine if you are able to reach the last index.</p>
+<p>For example:<br>A = <code>[2,3,1,1,4]</code>, return <code>true</code>.</p>
+<p>A = <code>[3,2,1,0,4]</code>, return <code>false</code>.</p>
+<h3 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h3><p>用distance表示i之前最远的距离，如果 <code>i &gt; diatance</code>，说明永远到达不了i,就退出循环<br>当distance &gt;= n-1时，至少能跳到最后</p>
+<p>夏令营时，我采用的是深搜，显然会超时</p>
+<h3 id="代码-2"><a href="#代码-2" class="headerlink" title="代码"></a>代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">bool canJump(vector&lt;int&gt;&amp; nums) &#123;</div><div class="line">	int distance = 0;</div><div class="line">	int n = nums.size();</div><div class="line">	for (int i = 0; i &lt; n &amp;&amp; i &lt;= distance; i++)</div><div class="line">	&#123;</div><div class="line">		distance = max(nums[i] + i, distance);</div><div class="line">	&#125;</div><div class="line">	if (distance &lt; n - 1)</div><div class="line">		return false;</div><div class="line">	return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="57-Insert-Interval"><a href="#57-Insert-Interval" class="headerlink" title="57.Insert Interval"></a>57.Insert Interval</h2><p>Given a set of non-overlapping intervals, insert a new interval into the intervals (merge if necessary).</p>
+<p>You may assume that the intervals were initially sorted according to their start times.</p>
+<p><strong>Example 1:</strong><br>Given intervals<code>[1,3],[6,9]</code>, insert and merge <code>[2,5]</code> in as <code>[1,5],[6,9]</code>.</p>
+<p><strong>Example 2:</strong><br>Given <code>[1,2],[3,5],[6,7],[8,10],[12,16]</code>, insert and merge <code>[4,9]</code> in as <code>[1,2],[3,10],[12,16]</code>.</p>
+<p>This is because the new interval <code>[4,9]</code> overlaps with <code>[3,5],[6,7],[8,10]</code>.</p>
+<h3 id="解题思路-1"><a href="#解题思路-1" class="headerlink" title="解题思路"></a>解题思路</h3><p>这个合并可以分为三个部分</p>
+<ol>
+<li><code>end &lt; newInterval.stat</code>，直接将其添加至新的<code>res</code>中</li>
+<li><code>start &gt; newInterval.end</code>，同上</li>
+<li>有部分相交，<code>start &lt;= newInterval.end</code>的部分，则<code>start</code>取最小值，<code>end</code>取最大值，并<code>push</code>进入结果中<h3 id="代码-3"><a href="#代码-3" class="headerlink" title="代码"></a>代码</h3></li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">vector</span>&lt;Interval&gt; insert(<span class="built_in">vector</span>&lt;Interval&gt;&amp; intervals, Interval newInterval) &#123;</div><div class="line">	<span class="keyword">int</span> i = <span class="number">0</span> ;</div><div class="line">	<span class="keyword">int</span> s = newInterval.start;</div><div class="line">	<span class="keyword">int</span> e = newInterval.end;</div><div class="line">	<span class="built_in">vector</span>&lt;Interval&gt;res;</div><div class="line">	<span class="keyword">if</span> (intervals.empty())</div><div class="line">	&#123;</div><div class="line">		intervals.push_back(newInterval);</div><div class="line">		<span class="keyword">return</span> intervals;</div><div class="line">	&#125;</div><div class="line">	<span class="comment">//前部</span></div><div class="line"></div><div class="line">	<span class="keyword">while</span> (i &lt; intervals.size() &amp;&amp; newInterval.start &gt; intervals[i].end)</div><div class="line">	&#123;</div><div class="line">		res.push_back(intervals[i]);</div><div class="line">		i++;</div><div class="line">	&#125;</div><div class="line">	<span class="comment">//中间</span></div><div class="line">	<span class="keyword">while</span> (i &lt; intervals.size() &amp;&amp; intervals[i].start &lt;= newInterval.end)</div><div class="line">	&#123;</div><div class="line">		s = min(s, intervals[i].start);</div><div class="line">		e = max(e, intervals[i].end);</div><div class="line">		i++;</div><div class="line">	&#125;</div><div class="line">	Interval t&#123; s, e &#125;;</div><div class="line">	res.push_back(t);</div><div class="line"></div><div class="line">	<span class="comment">//后部</span></div><div class="line">	<span class="keyword">while</span> (i &lt; intervals.size() &amp;&amp; newInterval.end &lt; intervals[i].start)</div><div class="line">	&#123;</div><div class="line">		res.push_back(intervals[i]);</div><div class="line">		i++;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> res;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Spiral-Matrix-II"><a href="#Spiral-Matrix-II" class="headerlink" title="Spiral Matrix II"></a>Spiral Matrix II</h2><p>Given an integer n, generate a square matrix filled with elements from 1 to n2 in spiral order.</p>
+<p>For example,<br>Given n = <code>3</code>,</p>
+<p>You should return the following matrix:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[</div><div class="line"> [ 1, 2, 3 ],</div><div class="line"> [ 8, 9, 4 ],</div><div class="line"> [ 7, 6, 5 ]</div><div class="line">]</div></pre></td></tr></table></figure></p>
+<h3 id="解题思路-2"><a href="#解题思路-2" class="headerlink" title="解题思路"></a>解题思路</h3><p>和之前的遍历类似，不再赘述，重要的是如何用verctor定义一个二维数组！！！<br><code>vector&lt;vector&lt;int&gt;&gt; res(n,vector&lt;int&gt;(n))</code> !!!<br><code>vector&lt;vector&lt;int&gt;&gt; res(n,vector&lt;int&gt;(n))</code> !!!</p>
+<h3 id="代码-4"><a href="#代码-4" class="headerlink" title="代码"></a>代码</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt; generateMatrix(<span class="keyword">int</span> n) &#123;</div><div class="line">	<span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt; res(n, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;(n));<span class="comment">//!!!!!!!!!!!!</span></div><div class="line">	<span class="keyword">int</span> i, j, k, l;</div><div class="line">	<span class="keyword">int</span> c = <span class="number">1</span>;</div><div class="line">	i = j = <span class="number">0</span>;</div><div class="line">	k = l = n - <span class="number">1</span>;</div><div class="line">	<span class="keyword">while</span> (c &lt;= n*n) </div><div class="line">	&#123;</div><div class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> m = j; m &lt;= l; m++)</div><div class="line">		&#123;</div><div class="line">			res[i][m] = c;</div><div class="line">			c++;</div><div class="line">		&#125;</div><div class="line">		i++;</div><div class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> m = i; m &lt;= k; m++)</div><div class="line">		&#123;</div><div class="line">			res[m][l] = c;</div><div class="line">			c++;</div><div class="line">		&#125;</div><div class="line">		l--;</div><div class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> m = l; m &gt;= j; m--)</div><div class="line">		&#123;</div><div class="line">			res[k][m] = c;</div><div class="line">			c++;</div><div class="line">		&#125;</div><div class="line">		k--;</div><div class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> m = k; m &gt;= i; m--)</div><div class="line">		&#123;</div><div class="line">			res[m][j] = c;</div><div class="line">			c++;</div><div class="line">		&#125;</div><div class="line">		j++;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> res;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/LeetCode/" rel="tag"># LeetCode</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/25/the-concurrency-on-go/" rel="next" title="The Concurrency on Go">
+                <i class="fa fa-chevron-left"></i> The Concurrency on Go
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/30/Raft-PartB/" rel="prev" title="Raft-PartB">
+                Raft-PartB <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">tommenx zx</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spiral-Matrix"><span class="nav-number">1.</span> <span class="nav-text">Spiral Matrix</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解析"><span class="nav-number">1.1.</span> <span class="nav-text">解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码"><span class="nav-number">1.2.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#简便的代码"><span class="nav-number">1.3.</span> <span class="nav-text">简便的代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Maximum-Subarray"><span class="nav-number">2.</span> <span class="nav-text">Maximum Subarray</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#愚蠢的代码"><span class="nav-number">2.1.</span> <span class="nav-text">愚蠢的代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优秀的代码"><span class="nav-number">2.2.</span> <span class="nav-text">优秀的代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#56-Merge-Intervals"><span class="nav-number">3.</span> <span class="nav-text">56. Merge Intervals</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解析-1"><span class="nav-number">3.1.</span> <span class="nav-text">解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码-1"><span class="nav-number">3.2.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#55-Jump-Game"><span class="nav-number">4.</span> <span class="nav-text">55. Jump Game</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解题思路"><span class="nav-number">4.1.</span> <span class="nav-text">解题思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码-2"><span class="nav-number">4.2.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#57-Insert-Interval"><span class="nav-number">5.</span> <span class="nav-text">57.Insert Interval</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解题思路-1"><span class="nav-number">5.1.</span> <span class="nav-text">解题思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码-3"><span class="nav-number">5.2.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spiral-Matrix-II"><span class="nav-number">6.</span> <span class="nav-text">Spiral Matrix II</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解题思路-2"><span class="nav-number">6.1.</span> <span class="nav-text">解题思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码-4"><span class="nav-number">6.2.</span> <span class="nav-text">代码</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tommenx zx</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问人数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
