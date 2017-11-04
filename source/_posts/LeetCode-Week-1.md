@@ -396,6 +396,183 @@ vector<vector<int>> generateMatrix(int n) {
 	return res;
 }
 ```
+## Unique Paths II
+Follow up for "Unique Paths":
+
+Now consider if some obstacles are added to the grids. How many unique paths would there be?
+
+An obstacle and empty space is marked as `1` and `0` respectively in the grid.
+
+For example,
+There is one obstacle in the middle of a 3x3 grid as illustrated below.
+```
+[
+  [0,0,0],
+  [0,1,0],
+  [0,0,0]
+]
+```
+The total number of unique paths is `2`.
+
+Note: m and n will be at most 100.
+
+### 解决思路
+这道题采用DP算法，到达当前点的路径数量等于左边和上面点的路径之和，同时要考虑边界的问题以及碰到障碍物时的处理办法
+###代码
+```
+int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+	int row = obstacleGrid.size();
+	int col = obstacleGrid[0].size();
+	int i, j;
+	vector<vector<int>> dp(row, vector<int>(col, 0));
+	for (i = 0; i < row; i++)
+	{
+		for (j = 0; j < col; j++)
+		{
+			if (obstacleGrid[i][j] == 1)
+				dp[i][j] = 0;
+			else if (i == 0 && j == 0)
+				dp[i][j] = 1;
+			else if (i == 0 && j > 0)
+				dp[i][j] = dp[i][j - 1];
+			else if (j == 0 && i > 0)
+				dp[i][j] = dp[i - 1][j];
+			else if (i > 0 && j > 0)
+				dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+		}
+	}
+	return dp[row - 1][col - 1];
+}
+```
+还有直接将边界扩大一圈，直接考虑边界的问题，代码如下
+```
+ int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+        int m = obstacleGrid.size(), n = obstacleGrid[0].size();
+        vector<vector<int> > dp(m + 1, vector<int> (n + 1, 0));
+        dp[0][1] = 1;
+        for (int i = 1; i <= m; i++)
+            for (int j = 1; j <= n; j++)
+                if (!obstacleGrid[i - 1][j - 1])
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+        return dp[m][n];
+    } 
+```
+
+## 93. Restore IP Addresses
+Given a string containing only digits, restore it by returning all possible valid IP address combinations.
+
+For example:
+Given `"25525511135"`,
+
+return `["255.255.11.135", "255.255.111.35"]`. (Order does not matter)
+### 解题思路
+采用dfs，每一次长度为1~3，如果这一小块的长度为3，且值>255不符合；如果起始值为0且长度>1则不符合
+最终当count==4并且指针指向结尾的时候符合要求并添加进结果中
+### 代码
+```
+void dfs(string ip,vector<string>& res, int idx, int count, string s)
+{
+	if (count > 4)
+		return;
+	if (count == 4 && idx == ip.length())
+	{
+		res.push_back(s);
+		return;
+	}
+	for (int i = 1; i < 4; i++)
+	{
+		if (idx + i > ip.length())
+			break;
+		string t = ip.substr(idx , i);
+		if ((t[0] == '0' && t.length() > 1) || (i == 3 && atoi(t.c_str()) > 255))
+			continue;
+		dfs(ip, res, idx + i, count + 1, s + t + (count == 3 ? "" : "."));
+	}
+}
+
+
+vector<string> restoreIpAddresses(string s) {
+	vector<string>res;
+	dfs(s, res, 0, 0, "");
+	return res;
+}
+```
+## 79. Word Search
+Given a 2D board and a word, find if the word exists in the grid.
+
+The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those horizontally or vertically neighboring. The same letter cell may not be used more than once.
+
+For example,
+Given **board** =
+```
+[
+  ['A','B','C','E'],
+  ['S','F','C','S'],
+  ['A','D','E','E']
+]
+```
+word = `"ABCCED"`, -> returns `true`,
+word = `"SEE"`, -> returns `true`,
+word = `"ABCB"`, -> returns `false`.
+### 解题思路
+这一次真的可以采用深搜的方法，从一个匹配的字母处开始寻找，规定查找的四个方向，如果当前字母与字符串中的字母相同，搜索下一个字母。
+同时，不能重复字母，因此可以创建一个与`board`相同大小的二维向量用于表示是否访问过
+记得回溯！
+## 代码
+```
+void find(int i, int j, int index, string word, vector<vector<char>>& board, int& res, vector<vector<int>>& visited)
+{
+    int idx[] = { 1, -1, 0, 0 };
+    int idy[] = { 0, 0, -1, 1 };
+	if (res == 0)
+	{
+		if (i < 0 || i >= board.size() || j < 0 || j >= board[i].size()||visited[i][j])
+			return;
+		if (board[i][j] != word[index])
+			return;
+		if (index == word.length() - 1)
+		{
+			res = 1;
+			return;
+		}
+		for (int k = 0; k < 4; k++)
+		{
+			int tx = i + idx[k];
+			int ty = j + idy[k];
+			visited[i][j] = 1;
+			find(tx, ty, index + 1, word, board, res,visited);
+			visited[i][j] = 0;
+
+		}
+	}
+}
+
+bool exist(vector<vector<char>>& board, string word) {
+	vector<vector<int>> visited(board.size(), vector<int>(board[0].size(), 0));
+	int res = 0;
+	int i, j, k;
+	for (i = 0; i < board.size(); i++)
+	{
+		for (j = 0; j < board[i].size(); j++)
+		{
+			if (board[i][j] == word[0])
+			{
+				find(i, j, 0, word, board, res,visited);
+				if (res)
+					break;
+			}
+			if (res)
+				break;
+		}
+	}
+	return res;
+}
+```
+## 后记
+这一周也终于结束了，感觉好像有点堕落有点拖拉，效率很低，希望加把劲咯
+总是需要一门很熟悉的语言！go 和 C++?
+
+
 
 
 
