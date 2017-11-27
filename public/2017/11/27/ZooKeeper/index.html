@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="mapreduce," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="zookeeper是一个分布式的协调系统，目标是封装好关键的服务，提供简易使用的借口，建立更加复杂的协调原语。并且，zookeeper是高效的，适用于以读为主的服务请求，任意一个server都可以服务于read请求，查找local replica并返回结果，而写操作则需要通过leader，并确保数据的一致性  一组server能够提高性能 Core feature在能大概读懂文章的内容之后，有以下">
+<meta name="keywords" content="mapreduce">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZooKeeper">
+<meta property="og:url" content="http://yoursite.com/2017/11/27/ZooKeeper/index.html">
+<meta property="og:site_name" content="tommenx&#39;s blogs">
+<meta property="og:description" content="zookeeper是一个分布式的协调系统，目标是封装好关键的服务，提供简易使用的借口，建立更加复杂的协调原语。并且，zookeeper是高效的，适用于以读为主的服务请求，任意一个server都可以服务于read请求，查找local replica并返回结果，而写操作则需要通过leader，并确保数据的一致性  一组server能够提高性能 Core feature在能大概读懂文章的内容之后，有以下">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2017/11/27/ZooKeeper/service.png">
+<meta property="og:image" content="http://yoursite.com/2017/11/27/ZooKeeper/zknamespace.jpg">
+<meta property="og:updated_time" content="2017-11-27T12:52:13.263Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ZooKeeper">
+<meta name="twitter:description" content="zookeeper是一个分布式的协调系统，目标是封装好关键的服务，提供简易使用的借口，建立更加复杂的协调原语。并且，zookeeper是高效的，适用于以读为主的服务请求，任意一个server都可以服务于read请求，查找local replica并返回结果，而写操作则需要通过leader，并确保数据的一致性  一组server能够提高性能 Core feature在能大概读懂文章的内容之后，有以下">
+<meta name="twitter:image" content="http://yoursite.com/2017/11/27/ZooKeeper/service.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/11/27/ZooKeeper/"/>
+
+
+
+
+
+  <title>ZooKeeper | tommenx's blogs</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">tommenx's blogs</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/27/ZooKeeper/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="tommenx zx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="tommenx's blogs">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ZooKeeper</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-27T19:24:21+08:00">
+                2017-11-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式系统</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/MIT6-824/" itemprop="url" rel="index">
+                    <span itemprop="name">MIT6.824</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 浏览
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>zookeeper是一个分布式的协调系统，目标是封装好关键的服务，提供简易使用的借口，建立更加复杂的协调原语。<br>并且，zookeeper是高效的，适用于以读为主的服务请求，任意一个server都可以服务于read请求，查找local replica并返回结果，而写操作则需要通过leader，并确保数据的一致性</p>
+<img src="/2017/11/27/ZooKeeper/service.png" alt="service.png" title="">
+<p>一组server能够提高性能</p>
+<h2 id="Core-feature"><a href="#Core-feature" class="headerlink" title="Core feature"></a>Core feature</h2><p>在能大概读懂文章的内容之后，有以下的几个特点印象特别深刻：</p>
+<h3 id="Wait-free"><a href="#Wait-free" class="headerlink" title="Wait-free"></a>Wait-free</h3><p>zookeeper最大的特点就是高效的，对比其他同步的算法，采用异步的算法能够有效的防止部分machine而阻塞了整个服务进程。<br>但是采用异步的方式难以保证一致性，但采用<strong>FIFO Client Order</strong>和<strong>Linearizable Writes</strong>保证了系统的协调性<br><strong>move away from blocking primitives,such as locks</strong></p>
+<h3 id="Complicated-imformation"><a href="#Complicated-imformation" class="headerlink" title="Complicated imformation"></a>Complicated imformation</h3><p>Znode并不是被设计来存储数据的，但可以存储复杂的meta-data和configuration</p>
+<h3 id="Znode"><a href="#Znode" class="headerlink" title="Znode"></a>Znode</h3><p>znode可以被设置 <code>sequential flag</code>，当<code>emphemral node</code>被删除后，同时也被删除。<br>同时采用递增的命名方式，序号小的是先被设置的—-可以用于锁的设置<br>采用类似UNIX的命名方式进行管理，如图所示<br><img src="/2017/11/27/ZooKeeper/zknamespace.jpg" alt="zknamespace.jpg" title=""></p>
+<h3 id="Client-API"><a href="#Client-API" class="headerlink" title="Client API"></a>Client API</h3><p>将复杂的一致性过程用简单的API进行包装，方便使用</p>
+<h2 id="Service-overview"><a href="#Service-overview" class="headerlink" title="Service overview"></a>Service overview</h2><p>下面来介绍一下整体的服务：</p>
+<ul>
+<li>znode作为数据对象，而客户端可以通过提供的API进行操纵</li>
+<li><code>wathces</code>作为一次性的触发器，在操作中绑定，用于数据更新的提醒</li>
+<li>提供API对<code>data object</code>进行操纵</li>
+</ul>
+<h3 id="Hierarchical-data-object"><a href="#Hierarchical-data-object" class="headerlink" title="Hierarchical data object"></a>Hierarchical data object</h3><p><code>data object</code>具有层次化的组织结构，像UNIX文件的文件组织结构。若要访问数据对象，输入该对象的绝对地址<br>当建立新的znode，可以设置<code>sequential flag</code>，使得znode命名中的数字是单调递增的<br>数据对象可以分成 <strong>Regular</strong>和<strong>Ephemeral</strong>两种：</p>
+<h4 id="Regular"><a href="#Regular" class="headerlink" title="Regular"></a>Regular</h4><p>客户端可以简单的创建并删除的对象</p>
+<h4 id="Ephemeral"><a href="#Ephemeral" class="headerlink" title="Ephemeral"></a>Ephemeral</h4><p>当客户端连接到ZK后可以创建临时的对象，并让ZK自动的删除（session 结束后）</p>
+<h3 id="Watches-callback"><a href="#Watches-callback" class="headerlink" title="Watches callback"></a>Watches callback</h3><p><code>watches</code>可以让客户端及时的接收某个数据的改变，可以在每次读取等操作时设置，仅仅只更新一次<br><code>getData(&quot;/foo&quot;,true)</code><br>当<code>/foo</code>发生改变之前，会通过<code>watch</code>通知client</p>
+<h3 id="Session"><a href="#Session" class="headerlink" title="Session"></a>Session</h3><ul>
+<li>client在连接到zk时确立一个session，当发出请求时获得一个session handle</li>
+<li>session设置了一个定时器，一段时间没有接收到信息，ZK认为client出错了</li>
+<li>watch 状态的变化</li>
+</ul>
+<h3 id="Client-API-1"><a href="#Client-API-1" class="headerlink" title="Client API"></a>Client API</h3><ol>
+<li><code>create(path,data,flags)</code>创建data object，flags —&gt; regular, ephemeral, set the sequential flag</li>
+<li><code>delete(path,version)</code>当版本号相对应后，删除数据对象</li>
+<li><code>exists(path,watch)</code> 允许设置<code>watch</code>，当数据对象不存在之前会notify客户端</li>
+<li><code>getData(path,watch)</code> 返回相应的data、meta-data，在change之前notify客户端</li>
+<li><code>setData(path,data,version)</code>将data[]写入相应的path中</li>
+<li><code>getChildren(path,watch)</code>返回znode的全部的children名字</li>
+<li><code>sync(path)</code>等待所有的更新操作的结束，使得read到的数据是最新的。</li>
+</ol>
+<p>上述API均有同步和异步两个版本，异步调用，zk client保证按照操作被调用的顺序执行回调；<br>所有更新操作均有版本号，可决定是否做版本检查</p>
+<h2 id="System-guarantees"><a href="#System-guarantees" class="headerlink" title="System guarantees"></a>System guarantees</h2><p>整个系统通过下面两个条件保证整个系统的协调性，下面有一个case以选举的方式具体说明整个过程：<br>当选举出一个新的leader时，这个leader会改变系统的设置，并通知各个节点，需要保证一下两点：</p>
+<ol>
+<li>当leader开始改变某些设置的时候，我们不希望任何process开始使用这些正在改变的设置</li>
+<li>当新的leader在设置完全更新完之前宕机后，我们不希望任何的process去使用这不完整的设置</li>
+</ol>
+<p>总之，就是希望其他的process在configuration完全设置完后再使用<br>leader可以指定一个地址作为ready zone，当configuration设置完成后，其他的process去读取，完整自己的更新。<br>这样一个异步的方式，比起leader去更新每一个znode快的多</p>
+<h3 id="Linearizable-writes"><a href="#Linearizable-writes" class="headerlink" title="Linearizable writes"></a>Linearizable writes</h3><p>所有更新操作都是序列化的。由于ZK强调高性能，因此我们这的linerizability是异步的方式，允许client拥有多个操作，并保证每一个client是以FIFO的方式执行的</p>
+<h3 id="FIFO-client-order"><a href="#FIFO-client-order" class="headerlink" title="FIFO client order"></a>FIFO client order</h3><p>所有的操作都是按照clent发送的顺序的顺序去执行的。</p>
+<h2 id="Example-of-primitives"><a href="#Example-of-primitives" class="headerlink" title="Example of primitives"></a>Example of primitives</h2><p>下面是利用ZK的API进行的一些case的设计，帮助更好的实现系统的一致性</p>
+<h3 id="Configuration-Management"><a href="#Configuration-Management" class="headerlink" title="Configuration Management"></a>Configuration Management</h3><p>如上面所说的选举完新的leader后需要对configuration有很多新的操作，因此会指定一个znode，所有的server异步的对这个地址进行读取，完成自身的configuration的更新操作。<br>利用watch进行监视，以便及时的收取到更新configuration的notification</p>
+<h3 id="Rendezbous（集结地）"><a href="#Rendezbous（集结地）" class="headerlink" title="Rendezbous（集结地）"></a>Rendezbous（集结地）</h3><p>当client创建master和client程序时，由于是决策器完成的，client并不知道worker和master的地址和端口，因此无法让worker连接master；<br>因此,client可以创建一个Zr并将它的地址传递给指定的master和所有的worker。<br>当worker启动时，read Zr,并设置watch=true，当master写入address和port之后，notify worker</p>
+<h3 id="Group-Membership"><a href="#Group-Membership" class="headerlink" title="Group Membership"></a>Group Membership</h3><p>设置一个<code>eephemeral Node</code>Zg代表整个group，并设置<code>sequential flag</code>保持唯一性<br>当创建一个process，则在Zg下创建一个znode，process fail，znode自动移除。</p>
+<h3 id="Simple-Lock-without-Herd-Effect"><a href="#Simple-Lock-without-Herd-Effect" class="headerlink" title="Simple Lock without Herd Effect"></a>Simple Lock without Herd Effect</h3><p>ZK可以创建简单的锁服务，原理是获得锁，就创建一个znode，释放锁就删除相对应的znode。<br>而znode中的命名的大小是作为请求获得锁的process的顺序，从小到大<br>为了避免<strong>herd effect</strong>,释放锁后仅仅唤醒一个等待的线程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">//lock()</div><div class="line">n = create(l+&quot;/lock-&quot;,EPHEMERAL|SEQUENTIAL)</div><div class="line">C = getChildren(l,false)</div><div class="line">if n is lowest znode in C,exit</div><div class="line">p = znode in C ordered just before n</div><div class="line">if exist(p,true) wait for watch event</div><div class="line">goto</div></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//unlock()</div><div class="line">delete(n)</div></pre></td></tr></table></figure>
+<p>简单的来说就是，创建在parent l 下创建一个n，如果n是这些锁中最小的一个，则获得锁并退出<br>如果不是，则在n前面一个锁p设置exsist的watch，当不存在时，通知当前线程，跳转到创建并获得锁的步骤<br>删除锁则直接将该znode删除即可</p>
+<h2 id="与其他的系统的对比"><a href="#与其他的系统的对比" class="headerlink" title="与其他的系统的对比"></a>与其他的系统的对比</h2><h3 id="ZK-vs-Chubby"><a href="#ZK-vs-Chubby" class="headerlink" title="ZK vs Chubby"></a>ZK vs Chubby</h3><p>chubby也有一个类似于文件系统的接口，它也使用一种特定的协议保证副本之间的一致性；however，zk不是一种锁服务，它可以用于实现锁，但是在API中没有锁操作。zk允许客户端连接任意一个zk server，不只是leader，zk client可以使用local replica来服务数据以及管理watch，因为它的一致性模型比chubby更放松；</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mapreduce/" rel="tag"># mapreduce</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/30/MapReduce/" rel="next" title="MapReduce">
+                <i class="fa fa-chevron-left"></i> MapReduce
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">tommenx zx</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Core-feature"><span class="nav-number">1.</span> <span class="nav-text">Core feature</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Wait-free"><span class="nav-number">1.1.</span> <span class="nav-text">Wait-free</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Complicated-imformation"><span class="nav-number">1.2.</span> <span class="nav-text">Complicated imformation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Znode"><span class="nav-number">1.3.</span> <span class="nav-text">Znode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Client-API"><span class="nav-number">1.4.</span> <span class="nav-text">Client API</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service-overview"><span class="nav-number">2.</span> <span class="nav-text">Service overview</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hierarchical-data-object"><span class="nav-number">2.1.</span> <span class="nav-text">Hierarchical data object</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Regular"><span class="nav-number">2.1.1.</span> <span class="nav-text">Regular</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ephemeral"><span class="nav-number">2.1.2.</span> <span class="nav-text">Ephemeral</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Watches-callback"><span class="nav-number">2.2.</span> <span class="nav-text">Watches callback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Session"><span class="nav-number">2.3.</span> <span class="nav-text">Session</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Client-API-1"><span class="nav-number">2.4.</span> <span class="nav-text">Client API</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#System-guarantees"><span class="nav-number">3.</span> <span class="nav-text">System guarantees</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Linearizable-writes"><span class="nav-number">3.1.</span> <span class="nav-text">Linearizable writes</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FIFO-client-order"><span class="nav-number">3.2.</span> <span class="nav-text">FIFO client order</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Example-of-primitives"><span class="nav-number">4.</span> <span class="nav-text">Example of primitives</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Configuration-Management"><span class="nav-number">4.1.</span> <span class="nav-text">Configuration Management</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rendezbous（集结地）"><span class="nav-number">4.2.</span> <span class="nav-text">Rendezbous（集结地）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Group-Membership"><span class="nav-number">4.3.</span> <span class="nav-text">Group Membership</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Simple-Lock-without-Herd-Effect"><span class="nav-number">4.4.</span> <span class="nav-text">Simple Lock without Herd Effect</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#与其他的系统的对比"><span class="nav-number">5.</span> <span class="nav-text">与其他的系统的对比</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ZK-vs-Chubby"><span class="nav-number">5.1.</span> <span class="nav-text">ZK vs Chubby</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tommenx zx</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问人数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
