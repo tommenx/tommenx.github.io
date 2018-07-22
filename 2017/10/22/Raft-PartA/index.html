@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="raft,golang," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本次的实验为MIT6.824 Distribute System 中 Lab2 raft part A,通过课程所给的代码的骨架，要求实验raft中选举部分的功能。由于我的水平较渣，觉得课程的难度较大，与其说是实验比如说是对Github上的大神的代码进行理解，并结合论文进行思考。希望有朝一日能够自己做出一个实验啊！  Implement leader election and heartbeats">
+<meta name="keywords" content="raft,golang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Raft-PartA">
+<meta property="og:url" content="http://yoursite.com/2017/10/22/Raft-PartA/index.html">
+<meta property="og:site_name" content="tommenx&#39;s blogs">
+<meta property="og:description" content="本次的实验为MIT6.824 Distribute System 中 Lab2 raft part A,通过课程所给的代码的骨架，要求实验raft中选举部分的功能。由于我的水平较渣，觉得课程的难度较大，与其说是实验比如说是对Github上的大神的代码进行理解，并结合论文进行思考。希望有朝一日能够自己做出一个实验啊！  Implement leader election and heartbeats">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2017/10/22/Raft-PartA/election.png">
+<meta property="og:updated_time" content="2018-04-30T13:49:56.135Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Raft-PartA">
+<meta name="twitter:description" content="本次的实验为MIT6.824 Distribute System 中 Lab2 raft part A,通过课程所给的代码的骨架，要求实验raft中选举部分的功能。由于我的水平较渣，觉得课程的难度较大，与其说是实验比如说是对Github上的大神的代码进行理解，并结合论文进行思考。希望有朝一日能够自己做出一个实验啊！  Implement leader election and heartbeats">
+<meta name="twitter:image" content="http://yoursite.com/2017/10/22/Raft-PartA/election.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/22/Raft-PartA/"/>
+
+
+
+
+
+  <title>Raft-PartA | tommenx's blogs</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">tommenx's blogs</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/22/Raft-PartA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="tommenx zx">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="tommenx's blogs">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Raft-PartA</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-22T18:39:29+08:00">
+                2017-10-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式系统</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/MIT-6-824/" itemprop="url" rel="index">
+                    <span itemprop="name">MIT 6.824</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i> 浏览
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本次的实验为MIT6.824 Distribute System 中 Lab2 raft part A,通过课程所给的代码的骨架，要求实验raft中选举部分的功能。由于我的水平较渣，觉得课程的难度较大，与其说是实验比如说是对Github上的大神的代码进行理解，并结合论文进行思考。希望有朝一日能够自己做出一个实验啊！</p>
+<blockquote>
+<p>Implement leader election and heartbeats (<code>AppendEntries</code> RPCs with no log entries). The goal for Part 2A is for a single leader to be elected, for the leader to remain the leader if there are no failures, and for a new leader to take over if the old leader fails or if packets to/from the old leader are lost. Run <code>go test -run 2A</code> to test your 2A code.</p>
+</blockquote>
+<p>Part A 部分要求实现raft的选举功能，其中raft中的每一个server都会维护自己的一个raft的结构体，其中只有两种RPC：<code>AppendEntries RPC</code> 和 <code>RequestVote RPC</code>。其中当<code>AppendEntres RPC</code>中的log为空时用作<code>HeartBeat</code>维护server 和 follower之间的通信，而<code>RequestVote RPC</code>则用作当follower转变成candidate时，向其他的server请求投票时的通信。整个选举的过程可以概括为下面的这张图，而其中又有许多的细节需要结合论文中的Figure 2中的每一个条件实现；</p>
+<img src="/2017/10/22/Raft-PartA/election.png" alt="election" title="election">
+<h2 id="可以概括为如下几个步骤"><a href="#可以概括为如下几个步骤" class="headerlink" title="可以概括为如下几个步骤"></a>可以概括为如下几个步骤</h2><ol>
+<li>系统初始化时，所有的server都是FLLOWER状态,并维护一个计时器，计时结束会成为CANDIDATE并开始选举；FOLLOWER每当收到一次<code>Herat Beat</code>或<code>RequestVote RPC</code>时重置计时器；</li>
+<li>CANDIDATE在选举的时候依旧会维护一个计时器向所有的SERVER发送<code>Request Vote</code>，在结束时仍未选举完，重新开始选举。当CANDIDATE获得大部分的投票后变为LEADER;在选举的过程中若收到来自更新的term的<code>AppendEntries RPC</code>或者自己的term小于其他server的term时，转变为FOLLOWER；</li>
+<li>LEADER开始广播<code>Heart Beat</code>包，广播自己成为LEADER的事实，并且维护和FOLLOWER之间的通信。当发现FOLLOWER的reply中有更高的term时转变为FOLLOWER；</li>
+</ol>
+<h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2><h3 id="定义一些常量"><a href="#定义一些常量" class="headerlink" title="定义一些常量"></a>定义一些常量</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> (</div><div class="line">	FOLLOWER = <span class="literal">iota</span></div><div class="line">	CANDIDATE</div><div class="line">	LEADER</div><div class="line"></div><div class="line">	HEARTBEAT_INTERVAL    = <span class="number">100</span></div><div class="line">	MIN_ELECTION_INTERVAL = <span class="number">400</span></div><div class="line">	MAX_ELECTION_INTERVAL = <span class="number">500</span></div><div class="line">)</div></pre></td></tr></table></figure>
+<h3 id="创建必要的结构体"><a href="#创建必要的结构体" class="headerlink" title="创建必要的结构体"></a>创建必要的结构体</h3><p>raft相当于server中的state machine<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Raft <span class="keyword">struct</span> &#123;</div><div class="line">	mu        sync.Mutex          <span class="comment">// Lock to protect shared access to this peer's state</span></div><div class="line">	peers     []*labrpc.ClientEnd <span class="comment">// RPC end points of all peers</span></div><div class="line">	persister *Persister          <span class="comment">// Object to hold this peer's persisted state</span></div><div class="line">	me        <span class="keyword">int</span>                 <span class="comment">// this peer's index into peers[]</span></div><div class="line"></div><div class="line">	<span class="comment">// Your data here (2A, 2B, 2C).</span></div><div class="line">	<span class="comment">// Look at the paper's Figure 2 for a description of what</span></div><div class="line">	<span class="comment">// state a Raft server must maintain.</span></div><div class="line"></div><div class="line">	votedFor     <span class="keyword">int</span>   <span class="comment">//投票给某个CANDIDATE id</span></div><div class="line">	voteAcquired <span class="keyword">int</span>   <span class="comment">//收到的票数总数，用于判断能否成为LEADER</span></div><div class="line">	state        <span class="keyword">int32</span> <span class="comment">//server当前的状态</span></div><div class="line">	currentTerm  <span class="keyword">int32</span> <span class="comment">//server当前的term</span></div><div class="line"></div><div class="line">	voteCh   <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; <span class="comment">//由于是并行发送用于指示server收到VoteRequest后的操作</span></div><div class="line">	appendCh <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; <span class="comment">//收到Append Entries后的操作</span></div><div class="line"></div><div class="line">	electionTimer *time.Timer <span class="comment">//用于FOLLOWER和CANDIDATE的操作</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>发送<code>RequestVote RPC</code>包中的内容<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> RequestVoteArgs <span class="keyword">struct</span> &#123;</div><div class="line">	Term        <span class="keyword">int32</span></div><div class="line">	CandidateId <span class="keyword">int</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>server对于<code>RequestVote RPC</code>包的回复<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> RequestVoteReply <span class="keyword">struct</span> &#123;</div><div class="line">	<span class="comment">// Your data here (2A).</span></div><div class="line">	Term        <span class="keyword">int32</span></div><div class="line">	VoteGranted <span class="keyword">bool</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>发送<code>AppendEntries RPC</code>包中的内容<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//此处只涉及选举，不考虑replication及log中的内容</span></div><div class="line"><span class="keyword">type</span> AppendEntriesArgs <span class="keyword">struct</span> &#123;</div><div class="line">	Term     <span class="keyword">int32</span></div><div class="line">	LeaderID <span class="keyword">int</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>接收<code>AppendEntries RPC</code>包，并回复<br>同样这里不考虑CANDIDATE中的log是否是最新的，只要有合适的<code>VoteReuest PRC</code>就投票<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> AppendEntriesReply <span class="keyword">struct</span> &#123;</div><div class="line">	Term    <span class="keyword">int32</span></div><div class="line">	Success <span class="keyword">bool</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>###一些重要的工具函数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">getTerm</span><span class="params">()</span> <span class="title">int32</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> atomic.LoadInt32(&amp;rf.currentTerm)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">incrementTerm</span><span class="params">()</span> <span class="title">int32</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> atomic.AddInt32(&amp;rf.currentTerm, <span class="number">1</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">isState</span><span class="params">(state <span class="keyword">int32</span>)</span> <span class="title">bool</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> atomic.LoadInt32(&amp;rf.state) == state</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">GetState</span><span class="params">()</span> <span class="params">(<span class="keyword">int</span>, <span class="keyword">bool</span>)</span></span> &#123;</div><div class="line"></div><div class="line">	<span class="keyword">var</span> term <span class="keyword">int</span></div><div class="line">	<span class="keyword">var</span> isleader <span class="keyword">bool</span></div><div class="line">	<span class="comment">// Your code here (2A).</span></div><div class="line">	term = <span class="keyword">int</span>(rf.getTerm())</div><div class="line">	isleader = rf.isState(LEADER)</div><div class="line">	<span class="keyword">return</span> term, isleader</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">randElectionDuration</span><span class="params">()</span> <span class="title">time</span>.<span class="title">Duration</span></span> &#123;</div><div class="line">	r := rand.New(rand.NewSource(time.Now().UnixNano()))</div><div class="line">	<span class="keyword">return</span> time.Millisecond * time.Duration(</div><div class="line">    			r.Int63n(MAX_ELECTION_INTERVAL-MIN_ELECTION_INTERVAL)+MIN_ELECTION_INTERVAL</div><div class="line">       	)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="CANDIDATE发送RequestVote-RPC包"><a href="#CANDIDATE发送RequestVote-RPC包" class="headerlink" title="CANDIDATE发送RequestVote RPC包"></a>CANDIDATE发送<code>RequestVote RPC</code>包</h3><p>用于CANDIDATE发送包和对reply的处理</p>
+<ul>
+<li>遍历每一个server，若投票了则voteGranted自增1</li>
+<li>若发现reply中的term大于自身当前的term，则转变为FOLLOWER</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">broadcastVoteReq</span><span class="params">()</span></span> &#123;</div><div class="line">	args := RequestVoteArgs&#123;Term: atomic.LoadInt32(&amp;rf.currentTerm), CandidateId: rf.me&#125;</div><div class="line">	<span class="keyword">for</span> i, _ := <span class="keyword">range</span> rf.peers &#123;</div><div class="line">		<span class="keyword">if</span> i == rf.me &#123;</div><div class="line">			<span class="keyword">continue</span></div><div class="line">		&#125;</div><div class="line">		<span class="comment">// is it is candidate then send vote req</span></div><div class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(server <span class="keyword">int</span>)</span></span> &#123;</div><div class="line">			<span class="keyword">var</span> reply RequestVoteReply</div><div class="line">			<span class="keyword">if</span> rf.isState(CANDIDATE) &amp;&amp; rf.sendRequestVote(server, &amp;args, &amp;reply) &#123;</div><div class="line">				rf.mu.Lock()</div><div class="line">				<span class="keyword">defer</span> rf.mu.Unlock()</div><div class="line">				<span class="comment">//deal with the reply</span></div><div class="line">				<span class="keyword">if</span> reply.VoteGranted &#123;</div><div class="line">					rf.voteAcquired += <span class="number">1</span></div><div class="line">				&#125; <span class="keyword">else</span> &#123;</div><div class="line">					<span class="keyword">if</span> reply.Term &gt; rf.currentTerm &#123;</div><div class="line">						rf.currentTerm = reply.Term</div><div class="line">						rf.updateStateTo(FOLLOWER)</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125; <span class="keyword">else</span> &#123;</div><div class="line">				fmt.Printf(<span class="string">"Server %d send vote req failed.\n"</span>, rf.me)</div><div class="line">			&#125;</div><div class="line">		&#125;(i)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="server对RequestVote-RPC的处理"><a href="#server对RequestVote-RPC的处理" class="headerlink" title="server对RequestVote RPC的处理"></a>server对<code>RequestVote RPC</code>的处理</h3><p>依据论文Figure 2中的要求，有以下几个处理的要点：</p>
+<ul>
+<li>判断自身的term是否大于CANDIDATE的term，若是则拒绝投票，并更新reply中的term</li>
+<li>若当前的term小于CANDIDATE发送的term，更新自身的term，并将自己的状态变为follower（当前状态为CANDIDATE或LEADER）</li>
+<li>当两者的term相等时，必须是初始状态，否则拒绝投票（FOLLOWER转变为CANDIDATE时候term自增1，因此必须大于其他server）</li>
+<li>投票成功后，利用信道通知主循环（整个操作是并行的）</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">RequestVote</span><span class="params">(args *RequestVoteArgs, reply *RequestVoteReply)</span></span> &#123;</div><div class="line">	<span class="comment">// Your code here (2A, 2B).</span></div><div class="line">	rf.mu.Lock()</div><div class="line">	<span class="keyword">defer</span> rf.mu.Unlock()</div><div class="line">	<span class="keyword">if</span> args.Term &lt; rf.currentTerm &#123;</div><div class="line">		reply.VoteGranted = <span class="literal">false</span></div><div class="line">		reply.Term = rf.currentTerm</div><div class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> args.Term &gt; rf.currentTerm &#123;</div><div class="line">		rf.currentTerm = args.Term</div><div class="line">		rf.updateStateTo(FOLLOWER)</div><div class="line">		rf.votedFor = args.CandidateId</div><div class="line">		reply.VoteGranted = <span class="literal">true</span></div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		<span class="keyword">if</span> rf.votedFor == <span class="number">-1</span> &#123;</div><div class="line">			rf.votedFor = args.CandidateId</div><div class="line">			reply.VoteGranted = <span class="literal">true</span></div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			reply.VoteGranted = <span class="literal">false</span></div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> reply.VoteGranted == <span class="literal">true</span> &#123;</div><div class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; rf.voteCh &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125; &#125;()</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="LEADER广播AppendEntries-RPC，和对reply的处理"><a href="#LEADER广播AppendEntries-RPC，和对reply的处理" class="headerlink" title="LEADER广播AppendEntries RPC，和对reply的处理"></a>LEADER广播<code>AppendEntries RPC</code>，和对reply的处理</h3><p>由于这里只是单纯的选举所以处理的逻辑很简单，只处理失败的回复：</p>
+<ul>
+<li>如果reply中的term大于当前LEADER中的term，则LEADER将自己的状态变成FOLLOWER</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">broadcastAppendEnrties</span><span class="params">()</span></span> &#123;</div><div class="line">	args := AppendEntriesArgs&#123;Term: atomic.LoadInt32(&amp;rf.currentTerm), LeaderID: rf.me&#125;</div><div class="line">	<span class="keyword">for</span> i, _ := <span class="keyword">range</span> rf.peers &#123;</div><div class="line">		<span class="keyword">if</span> i == rf.me &#123;</div><div class="line">			<span class="keyword">continue</span></div><div class="line">		&#125;</div><div class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(server <span class="keyword">int</span>)</span></span> &#123;</div><div class="line">			<span class="keyword">var</span> reply AppendEntriesReply</div><div class="line">			<span class="keyword">if</span> rf.isState(LEADER) &amp;&amp; rf.sendAppendEntries(server, &amp;args, &amp;reply) &#123;</div><div class="line">				rf.mu.Lock()</div><div class="line">				<span class="keyword">defer</span> rf.mu.Unlock()</div><div class="line">				<span class="keyword">if</span> reply.Success &#123;</div><div class="line"></div><div class="line">				&#125; <span class="keyword">else</span> &#123;</div><div class="line">					<span class="keyword">if</span> reply.Term &gt; rf.currentTerm &#123;</div><div class="line">						rf.currentTerm = reply.Term</div><div class="line">						rf.updateStateTo(FOLLOWER)</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;(i)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="server对AppendEntries-RPC的处理"><a href="#server对AppendEntries-RPC的处理" class="headerlink" title="server对AppendEntries RPC的处理"></a>server对<code>AppendEntries RPC</code>的处理</h3><p>同样，raft中的term可以作为判断是不是最新的依据，根据Figure 2，server在处理<code>AppendEntries RPC</code>，有如下注意点：</p>
+<ul>
+<li>如果<code>args.Term &lt; rf.currentTerm</code>，<code>reply.Term = rf.currentTerm</code>;</li>
+<li>如果<code>args.Term &gt; rf.currentTerm</code>，更新当前的term并且将状态改变为FOLLOWER（针对当前状态为CANDIDATE的server）</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">AppendEntries</span><span class="params">(args *AppendEntriesArgs, reply *AppendEntriesReply)</span></span> &#123;</div><div class="line">	rf.mu.Lock()</div><div class="line">	<span class="keyword">defer</span> rf.mu.Unlock()</div><div class="line">	<span class="comment">//deal with the msg and reply</span></div><div class="line">	<span class="keyword">if</span> args.Term &lt; rf.currentTerm &#123;</div><div class="line">		reply.Success = <span class="literal">false</span></div><div class="line">		reply.Term = rf.currentTerm</div><div class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> args.Term &gt; rf.currentTerm &#123;</div><div class="line">		rf.currentTerm = args.Term</div><div class="line">		rf.updateStateTo(FOLLOWER)</div><div class="line">		reply.Success = <span class="literal">true</span></div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		reply.Success = <span class="literal">true</span></div><div class="line">	&#125;</div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		rf.appendCh &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</div><div class="line">	&#125;()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="状态转变的函数"><a href="#状态转变的函数" class="headerlink" title="状态转变的函数"></a>状态转变的函数</h3><p>需要注意的是当转变成FOLLOWER时，要将自己的<code>VoteFor</code>初始化为-1，当转变成CANDIDATE时候要注意开始选举LEADER<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">updateStateTo</span><span class="params">(state <span class="keyword">int32</span>)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> rf.isState(state) &#123;</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">	stateDesc := []<span class="keyword">string</span>&#123;<span class="string">"FOLLOWER"</span>, <span class="string">"CANDIDATE"</span>, <span class="string">"LEADER"</span>&#125;</div><div class="line">	preState := rf.state</div><div class="line">	<span class="keyword">switch</span> state &#123;</div><div class="line">	<span class="keyword">case</span> FOLLOWER:</div><div class="line">		rf.state = FOLLOWER</div><div class="line">		rf.votedFor = <span class="number">-1</span></div><div class="line">	<span class="keyword">case</span> CANDIDATE:</div><div class="line">		rf.state = CANDIDATE</div><div class="line">		rf.startElection()</div><div class="line">	<span class="keyword">case</span> LEADER:</div><div class="line">		rf.state = LEADER</div><div class="line">	<span class="keyword">default</span>:</div><div class="line">		fmt.Printf(<span class="string">"Warning: invalid state %d, do nothing.\n"</span>, state)</div><div class="line">	&#125;</div><div class="line">	fmt.Printf(<span class="string">"In term %d: Server %d transfer from %s to %s\n"</span>,</div><div class="line">		rf.currentTerm, rf.me, stateDesc[preState], stateDesc[rf.state])</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="开始新一轮选举的函数"><a href="#开始新一轮选举的函数" class="headerlink" title="开始新一轮选举的函数"></a>开始新一轮选举的函数</h3><p>按照论文的要求在开始选举新的LEADER的时候要重置计时器，因为CANDIDATE会为自己投票所以票数初始置为1<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">startElection</span><span class="params">()</span></span> &#123;</div><div class="line">	rf.incrementTerm()  <span class="comment">//first increase current term</span></div><div class="line">	rf.votedFor = rf.me <span class="comment">//vote for self</span></div><div class="line">	rf.voteAcquired = <span class="number">1</span> <span class="comment">//acquire self's vote</span></div><div class="line">	rf.electionTimer.Reset(randElectionDuration())</div><div class="line">	rf.broadcastVoteReq()</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="整个状态的循环实现"><a href="#整个状态的循环实现" class="headerlink" title="整个状态的循环实现"></a>整个状态的循环实现</h4><p>不断的循环，并根据当前server的角色进行不同的操作</p>
+<h4 id="FOLLOWER"><a href="#FOLLOWER" class="headerlink" title="FOLLOWER"></a>FOLLOWER</h4><ul>
+<li>当收到CANDIDATE发送的<code>VoteRequest RPC</code>时，重置计时器</li>
+<li>当收到LEADER发送的<code>AppendEntries RPC</code>时，重置计时器</li>
+<li>当计时器结束时，说明当前的server断绝联系，于是FOLLOWER转变为CANDIDATE开始新一轮的选举</li>
+</ul>
+<h4 id="CANDIDATE"><a href="#CANDIDATE" class="headerlink" title="CANDIDATE"></a>CANDIDATE</h4><ul>
+<li>在收到<code>AppendEntries RPC</code>时，说明LEADER依旧存在，停止选举转变为FOLLOWER</li>
+<li>当计时器结束时，重新开始选举</li>
+<li>当投票数大于总数的一半时，当选LEADER</li>
+</ul>
+<h4 id="LEADER"><a href="#LEADER" class="headerlink" title="LEADER"></a>LEADER</h4><ul>
+<li>间隔一段时间发送<code>HeartBeat</code>心跳包维持LEADER和其他的server的通信</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rf *Raft)</span> <span class="title">startLoop</span><span class="params">()</span></span> &#123;</div><div class="line">	rf.electionTimer = time.NewTimer(randElectionDuration())</div><div class="line">	<span class="keyword">for</span> &#123;</div><div class="line">		<span class="keyword">switch</span> atomic.LoadInt32(&amp;rf.state) &#123;</div><div class="line">		<span class="keyword">case</span> FOLLOWER:</div><div class="line">			<span class="keyword">select</span> &#123;</div><div class="line">			<span class="keyword">case</span> &lt;-rf.voteCh:</div><div class="line">				rf.electionTimer.Reset(randElectionDuration())</div><div class="line">			<span class="keyword">case</span> &lt;-rf.appendCh:</div><div class="line">				rf.electionTimer.Reset(randElectionDuration())</div><div class="line">			<span class="keyword">case</span> &lt;-rf.electionTimer.C:</div><div class="line">				<span class="comment">//time out</span></div><div class="line">				rf.mu.Lock()</div><div class="line">				rf.updateStateTo(CANDIDATE)</div><div class="line">				rf.mu.Unlock()</div><div class="line">			&#125;</div><div class="line">		<span class="keyword">case</span> CANDIDATE:</div><div class="line">			rf.mu.Lock()</div><div class="line">			<span class="keyword">select</span> &#123;</div><div class="line">			<span class="keyword">case</span> &lt;-rf.appendCh:</div><div class="line">				rf.updateStateTo(FOLLOWER)</div><div class="line">			<span class="keyword">case</span> &lt;-rf.electionTimer.C:</div><div class="line">				rf.electionTimer.Reset(randElectionDuration())</div><div class="line">				rf.startElection()</div><div class="line">			<span class="keyword">default</span>:</div><div class="line">				<span class="keyword">if</span> rf.voteAcquired &gt; <span class="built_in">len</span>(rf.peers)/<span class="number">2</span> &#123;</div><div class="line">					rf.updateStateTo(LEADER)</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">			rf.mu.Unlock()</div><div class="line">		<span class="keyword">case</span> LEADER:</div><div class="line">			rf.broadcastAppendEnrties()</div><div class="line">			time.Sleep(HEARTBEAT_INTERVAL * time.Millisecond)</div><div class="line">		&#125;</div><div class="line"></div><div class="line">	&#125;</div></pre></td></tr></table></figure>
+<h3 id="初始化并开始循环"><a href="#初始化并开始循环" class="headerlink" title="初始化并开始循环"></a>初始化并开始循环</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Make</span><span class="params">(peers []*labrpc.ClientEnd, me <span class="keyword">int</span>,</span></span></div><div class="line"><span class="function"><span class="params">	persister *Persister, applyCh <span class="keyword">chan</span> ApplyMsg)</span> *<span class="title">Raft</span></span> &#123;</div><div class="line">	rf := &amp;Raft&#123;&#125;</div><div class="line">	rf.peers = peers</div><div class="line">	rf.persister = persister</div><div class="line">	rf.me = me</div><div class="line"></div><div class="line">	<span class="comment">// Your initialization code here (2A, 2B, 2C).</span></div><div class="line">	rf.state = FOLLOWER</div><div class="line">	rf.votedFor = <span class="number">-1</span></div><div class="line">	rf.voteCh = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</div><div class="line">	rf.appendCh = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</div><div class="line"></div><div class="line">	<span class="comment">// initialize from state persisted before a crash</span></div><div class="line">	rf.readPersist(persister.ReadRaftState())</div><div class="line"></div><div class="line">	<span class="keyword">go</span> rf.startLoop()</div><div class="line"></div><div class="line">	<span class="keyword">return</span> rf</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><hr>
+<p>第一次将论文中的算法“实现”，虽然是参考了大神的代码，还是觉得收获满满。<br>首先，纠正了我看论文一目十行的方法，以前总觉得论文这东西太虚，只是所谓的想法，经过这次无数遍的研读之后，发现论文中的每一句话对于整个算法的执行都有至关重要的作用。因此，以后在看论文的时候，需要逐句理解，最好能够抽象出整个模型，并且思考论文这么做对于整个系统的实现有什么好处<br>其次，自己的代码的能力实在是弱的不行，我能看得懂这些代码，并能在脑中把每一个函数链接起来，但是距离完全靠自己的能力去实现一个这样的系统还有相当长的路要走。<br>希望能坚持将自己所看的论文、方法都能用自己的话去说出来，加深下理解。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/raft/" rel="tag"># raft</a>
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/25/the-concurrency-on-go/" rel="prev" title="The Concurrency on Go">
+                The Concurrency on Go <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">tommenx zx</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#可以概括为如下几个步骤"><span class="nav-number">1.</span> <span class="nav-text">可以概括为如下几个步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码解析"><span class="nav-number">2.</span> <span class="nav-text">代码解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义一些常量"><span class="nav-number">2.1.</span> <span class="nav-text">定义一些常量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建必要的结构体"><span class="nav-number">2.2.</span> <span class="nav-text">创建必要的结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CANDIDATE发送RequestVote-RPC包"><span class="nav-number">2.3.</span> <span class="nav-text">CANDIDATE发送RequestVote RPC包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#server对RequestVote-RPC的处理"><span class="nav-number">2.4.</span> <span class="nav-text">server对RequestVote RPC的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LEADER广播AppendEntries-RPC，和对reply的处理"><span class="nav-number">2.5.</span> <span class="nav-text">LEADER广播AppendEntries RPC，和对reply的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#server对AppendEntries-RPC的处理"><span class="nav-number">2.6.</span> <span class="nav-text">server对AppendEntries RPC的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#状态转变的函数"><span class="nav-number">2.7.</span> <span class="nav-text">状态转变的函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开始新一轮选举的函数"><span class="nav-number">2.8.</span> <span class="nav-text">开始新一轮选举的函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#整个状态的循环实现"><span class="nav-number">2.8.1.</span> <span class="nav-text">整个状态的循环实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FOLLOWER"><span class="nav-number">2.8.2.</span> <span class="nav-text">FOLLOWER</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CANDIDATE"><span class="nav-number">2.8.3.</span> <span class="nav-text">CANDIDATE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LEADER"><span class="nav-number">2.8.4.</span> <span class="nav-text">LEADER</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化并开始循环"><span class="nav-number">2.9.</span> <span class="nav-text">初始化并开始循环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tommenx zx</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问人数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
